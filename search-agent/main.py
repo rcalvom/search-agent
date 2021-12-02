@@ -4,5 +4,5 @@ import time
 
 drawer = Drawer()
 for i in range(100):
-    drawer.draw(status=State())
+    drawer.draw(state=State())
     time.sleep(1);

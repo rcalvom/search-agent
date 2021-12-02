@@ -5,8 +5,7 @@ from drawer.models import *
 class Drawer:
 
 
-
-    def __init__(self):
+    def __init__(self, state):
         self.cell_size = 50
         self.canvas = Canvas(width=31 * self.cell_size, height=14 * self.cell_size, background='white')
         self.canvas.pack(expand=YES, fill=BOTH)
@@ -22,6 +21,9 @@ class Drawer:
             '#FF00FF',
             '#FFD700'
         ]
+
+    def draw(self, state):
+
         # Draw Title
 
         # Draw board
@@ -43,13 +45,13 @@ class Drawer:
             width=3
         )
         # Draw laminates
-        for index, laminate in enumerate(status.laminates):
+        for index, laminate in enumerate(state.laminates):
             if laminate.rotation == Rotation.VERTICAL:
                 self.canvas.create_rectangle(
                     self.cell_size * laminate.x + self.cell_size + laminate.sheet * self.cell_size * 19,
                     self.cell_size * laminate.y + 3 * self.cell_size,
-                    self.cell_size * laminate.x +self.cell_size + laminate.sheet * self.cell_size * 19 + self.cell_size * Status.laminate_dimensions[index][0],
-                    self.cell_size * laminate.y + 3 * self.cell_size + self.cell_size * Status.laminate_dimensions[index][1],
+                    self.cell_size * laminate.x +self.cell_size + laminate.sheet * self.cell_size * 19 + self.cell_size * State.laminate_dimensions[index][0],
+                    self.cell_size * laminate.y + 3 * self.cell_size + self.cell_size * State.laminate_dimensions[index][1],
                     outline=self.colors[index],
                     width=2,
                     fill=self.colors[index],
@@ -60,8 +62,8 @@ class Drawer:
                 self.canvas.create_rectangle(
                     self.cell_size * laminate.x + self.cell_size + laminate.sheet * self.cell_size * 19,
                     self.cell_size * laminate.y + 3 * self.cell_size,
-                    self.cell_size * laminate.x + self.cell_size + laminate.sheet * self.cell_size * 19 + self.cell_size * Status.laminate_dimensions[index][1],
-                    self.cell_size * laminate.y + 3 * self.cell_size + self.cell_size * Status.laminate_dimensions[index][0],
+                    self.cell_size * laminate.x + self.cell_size + laminate.sheet * self.cell_size * 19 + self.cell_size * State.laminate_dimensions[index][1],
+                    self.cell_size * laminate.y + 3 * self.cell_size + self.cell_size * State.laminate_dimensions[index][0],
                     outline=self.colors[index],
                     width=2,
                     fill=self.colors[index],
