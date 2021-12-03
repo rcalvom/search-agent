@@ -1,3 +1,5 @@
+# this solution was made based on the code from https://www.youtube.com/watch?v=T28fr9wDZrg
+
 import time
 import math
 import random
