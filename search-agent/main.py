@@ -1,8 +1,16 @@
+from time import sleep
 from drawer.drawer import Drawer
+from agent.annealing.sa import SimulatedAnnealing
 from drawer.models import *
-import time
 
 drawer = Drawer()
-for i in range(100):
-    drawer.draw(state=State())
-    time.sleep(1);
+state = State()
+sa = SimulatedAnnealing(state) # simulated annealing solution
+
+# drawer.draw(state)
+newLaminates = sa.solution()
+# for i in newLaminates:
+  # print('x: {}, y: {}, used: {}'.format(i.x, i.y, i.used))
+state.laminates = newLaminates
+
+# drawer.draw(state) # draw the best configuration
