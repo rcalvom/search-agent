@@ -40,6 +40,7 @@ class GeneticAlgorithm:
     def tableCalculation(self, chromosomes, areas):
         
         zTotal = 0
+        zProm = 0
         accumProb = 0
         fullTable = copy.deepcopy(chromosomes)
 
@@ -53,6 +54,8 @@ class GeneticAlgorithm:
             fullTable[p].append(piecesQ)
             fullTable[p].append(z)
 
+        zProm = zTotal/10
+
         for chromosome in fullTable:
             localProb = chromosome[11]/zTotal
             chromosome.append(localProb)
@@ -61,7 +64,7 @@ class GeneticAlgorithm:
 
         #print(fullTable)    
 
-        return fullTable
+        return fullTable, zProm
 
     def parentSelection(self, fullTable, chromosomes, cutProb):
 
@@ -143,15 +146,17 @@ class GeneticAlgorithm:
 
         return newBorn1, newBorn2
 
-    def getsAdded(self, son1, son2, newGenes, areas):
+    def getsAdded(self, son1, son2, newGenes, areas, zProm):
 
         length = len(newGenes)
+        zSon1 = self.zLineCalculus(son1, areas)
+        zSon2 = self.zLineCalculus(son2, areas)
         
-        if(self.zLineCalculus(son1, areas) <= 100):
+        if((zSon1 <= 100) and (zSon1 >= zProm)):
             newGenes.append(son1)
             length = len(newGenes)
         if(length != 10):
-            if(self.zLineCalculus(son2, areas) <= 100):
+            if((zSon2 <= 100) and (zSon2 >= zProm)):
                 newGenes.append(son2)
 
         return newGenes
@@ -164,14 +169,14 @@ class GeneticAlgorithm:
         while(len(newGeneration) < 10):
             
             presentGenes = self.tableCalculation(chromosomes, areas)
-            parents = self.parentSelection(presentGenes, chromosomes, cutProb)
+            parents = self.parentSelection(presentGenes[0], chromosomes, cutProb)
 
             if(parents[2]): 
                 parents = self.cutProcedure(parents[0], parents[1])
 
             mutatedGenes = self.mutProcedure(parents[0], parents[1], mutProb)
 
-            newGeneration = self.getsAdded(mutatedGenes[0], mutatedGenes[1], newGeneration, areas)
+            newGeneration = self.getsAdded(mutatedGenes[0], mutatedGenes[1], newGeneration, areas, presentGenes[1])
 
         newTable = self.tableCalculation(newGeneration,areas)
 
@@ -209,11 +214,11 @@ class GeneticPieceAlgorithm:
 attempt = GeneticAlgorithm()
 newBorns = []
 
-for y in range(100):
+for y in range(6):
 
     newBorns = attempt.doGenetic(attempt.chromosomes, attempt.areas, attempt.cutProb, attempt.mutProb, attempt.newGenes)
     if(y==0):
-        for item in newBorns[1]:
+        for item in newBorns[1][0]:
             print(item)
     attempt.updateGen(newBorns[0])
     
@@ -221,6 +226,6 @@ for y in range(100):
 
 print("----------------------------------------------------------------")
 
-for newBorns in newBorns[1]:
+for newBorns in newBorns[1][0]:
     print(newBorns)
 
