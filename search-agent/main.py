@@ -1,8 +1,18 @@
 from drawer.drawer import Drawer
-from drawer.models import *
+from agent.hill_climbing.models import *
+from agent.hill_climbing.agent import *
 import time
 
-drawer = Drawer()
-for i in range(100):
-    drawer.draw(state=State())
-    time.sleep(1);
+# Solución usando el método de busqueda del ascenso de la colina
+
+
+
+
+drawer = Drawer(title="Hill Climbing")
+
+S = State()
+
+for i in range(1000):
+    drawer.draw(S, i)
+    time.sleep(0.2)
+    S = best_neighbour(S)
