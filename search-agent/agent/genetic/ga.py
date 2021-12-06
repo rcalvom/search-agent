@@ -3,10 +3,11 @@ import matplotlib.pyplot as plt
 import matplotlib as mtpl
 import random as rn
 import copy
-#from drawer import *
 
-from numpy.lib.function_base import piecewise
-#from drawer.models import laminate_dimensions
+from numpy.lib.function_base import disp, piecewise
+
+currentPreTable = []
+currentEndTable = []
 
 class GeneticAlgorithm:
 
@@ -19,6 +20,7 @@ class GeneticAlgorithm:
     chromosomes = []
     newGenes = []
     fullTable = []
+    doneTable = []
 
     cutProb = 0.98
     mutProb = 0.1
@@ -184,6 +186,9 @@ class GeneticAlgorithm:
 
     def updateGen(self, future):
         self.chromosomes = copy.deepcopy(future)
+
+    def updateLastTable(self, futureTable):
+        self.doneTable = copy.deepcopy(futureTable)
     
 
 class GeneticPieceAlgorithm:
@@ -197,35 +202,144 @@ class GeneticPieceAlgorithm:
     areas = []
     inheritance = []
     newinheritance = []
-    completeTable = []
+    completeTable = GeneticAlgorithm.doneTable
+    beginTable = GeneticAlgorithm.chromosomes
+    zeds = []
+    fitnessMeasure = 0
 
-    cutProb = 0.98
-    mutProb = 0.1
+
+    optimized =  False
 
     for piece in laminate_dimensions:
        areas.append(piece[0]*piece[1]) 
 
-    for i in range(10):
-        inheritance.append(rn.choices([0, 1], k = 3))
+    def pieceAssignment(self, table, genomesTable):
+
+        if(len(self.zeds) == 0):
+            for piece in table:
+                self.zeds.append(piece[11])
+
+        bestZed = max(self.zeds)    
+
+        bestZedIndex = self.zeds.index(bestZed)
+
+        self.zeds.pop(bestZedIndex)
+
+        takenGenome = genomesTable[bestZedIndex]
+
+        for i in range(10):
+
+            actualPiece = self.laminate_dimensions[i]
+            xMargin = 10 - actualPiece[0]
+            yMargin = 10 - actualPiece[1]
+
+            xCor =  rn.randrange(xMargin + 1)
+            yCor =  rn.randrange(yMargin + 1)
+
+            used = takenGenome[i]
+
+            orientation = rn.randint(0, 1)
+
+            if orientation == 1:
+                wholeGen = [xCor, yCor, orientation, used]
+            else: wholeGen = [yCor, xCor, orientation, used]
+
+            
+
+            self.inheritance.append(wholeGen)
+
+        return bestZedIndex, bestZed
+
+    
+
+    def piecePlacement(self, genomePieces, display):
+
+        for x in range(10):
+
+            actualDimension = self.laminate_dimensions[x]
+            prefixOrientation = ""
+            treatingChromosome = genomePieces[x]
+
+            if(actualDimension[0] >= actualDimension[1]):
+                prefixOrientation = "wide"
+            else: prefixOrientation = "long"
+
+            if(treatingChromosome[3] == 1):
+                for i in range(actualDimension[0]):
+                    for j in range(actualDimension[1]):
+                        if((treatingChromosome[2] == 1) and (prefixOrientation == "wide")):
+                            display[treatingChromosome[0]+ i][treatingChromosome[1] + j] +=  x + 1
+                        elif((treatingChromosome[2] == 1) and (prefixOrientation == "long")): 
+                            display[treatingChromosome[0]+ j][treatingChromosome[1] + i] +=  x + 1
+                        elif((treatingChromosome[2] == 0) and (prefixOrientation == "wide")):
+                            display[treatingChromosome[0]+ j][treatingChromosome[1] + i] +=  x + 1
+                        elif((treatingChromosome[2] == 0) and (prefixOrientation == "long")): 
+                            display[treatingChromosome[0]+ i][treatingChromosome[1] + j] +=  x + 1
+            
+    def areaCalculus(self, display):
+
+        uncoveredArea = np.count_nonzero(display)
+
+        usedArea = 100 - uncoveredArea
+
+        return usedArea
+
+    def runPosition(self, beginTable, completeTable, factGenomes, display):
+
+        zComparisson = self.pieceAssignment(completeTable, beginTable)[1]
+
+        self.piecePlacement(factGenomes, display)
+
+        usedArea = self.areaCalculus(display)
+
+        if(usedArea == zComparisson):
+            optimized = True
+
+        return usedArea, zComparisson    
 
 
 
-
+    
 attempt = GeneticAlgorithm()
 newBorns = []
+finalGen = []
 
-for y in range(6):
+for y in range(3):
 
     newBorns = attempt.doGenetic(attempt.chromosomes, attempt.areas, attempt.cutProb, attempt.mutProb, attempt.newGenes)
     if(y==0):
+        print("Primera generación:")
         for item in newBorns[1][0]:
             print(item)
-    attempt.updateGen(newBorns[0])
-    
-    #newBorns = []
+    finalGen = attempt.updateGen(newBorns[0])
+print("--------------------------------------------------------------------")
+attempt.updateLastTable(newBorns[1][0])
+print("Ultima generación:")
+for item in newBorns[1][0]:
+    print(item)
 
-print("----------------------------------------------------------------")
+print("--------------------------------------------------------------------")
 
-for newBorns in newBorns[1][0]:
-    print(newBorns)
+assingation = GeneticPieceAlgorithm()
+
+for g in range(150):
+
+    fitnessCheck = assingation.runPosition(attempt.chromosomes, attempt.doneTable, assingation.inheritance, assingation.laminateDisplay)
+
+    if(fitnessCheck[0] > (fitnessCheck[1])*0.57): 
+        print("Intento #" + str(g))
+        break
+    assingation.laminateDisplay = np.zeros((10,10))
+    assingation.inheritance = []
+
+print("**********************************************************")
+
+plt.imshow(assingation.laminateDisplay)
+plt.colorbar()
+plt.show()    
+
+finalGen = []
+newBorns = []
+attempt.newGenes = []
+attempt.doneTable = []
 
